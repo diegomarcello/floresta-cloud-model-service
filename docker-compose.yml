@@ -1,0 +1,121 @@
+version: '3.8'
+
+services:
+  # Message Broker
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - floresta-net
+
+  # Central Manager
+  master:
+    build:
+      context: .
+      dockerfile: services/master/Dockerfile
+    depends_on:
+      - redis
+    volumes:
+      - ./services/master/src:/app/src
+      - ./shared:/shared
+    environment:
+      - REDIS_HOST=redis
+    networks:
+      - floresta-net
+
+  # Intelligence Services
+  ml_inference:
+    build:
+      context: .
+      dockerfile: services/ml_inference/Dockerfile
+    depends_on:
+      - redis
+    volumes:
+      - ./services/ml_inference/src:/app/src
+      - ./shared:/shared
+    environment:
+      - REDIS_HOST=redis
+    networks:
+      - floresta-net
+
+  rpa_worker:
+    build:
+      context: .
+      dockerfile: services/rpa_worker/Dockerfile
+    depends_on:
+      - redis
+    volumes:
+      - ./services/rpa_worker/src:/app/src
+      - ./shared:/shared
+    environment:
+      - REDIS_HOST=redis
+    networks:
+      - floresta-net
+
+  data_collector:
+    build:
+      context: .
+      dockerfile: services/data_collector/Dockerfile
+    depends_on:
+      - redis
+    volumes:
+      - ./services/data_collector/src:/app/src
+      - ./shared:/shared
+    environment:
+      - REDIS_HOST=redis
+    networks:
+      - floresta-net
+
+  data_governance:
+    build:
+      context: .
+      dockerfile: services/data_governance/Dockerfile
+    depends_on:
+      - redis
+    volumes:
+      - ./services/data_governance/src:/app/src
+      - ./shared:/shared
+    environment:
+      - REDIS_HOST=redis
+    networks:
+      - floresta-net
+
+  llm_tuner:
+    build:
+      context: .
+      dockerfile: services/llm_tuner/Dockerfile
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    depends_on:
+      - redis
+    volumes:
+      - ./services/llm_tuner/src:/app/src
+      - ./shared:/shared
+    environment:
+      - REDIS_HOST=redis
+    networks:
+      - floresta-net
+
+  monitor:
+    build:
+      context: .
+      dockerfile: services/monitor/Dockerfile
+    depends_on:
+      - redis
+    volumes:
+      - ./services/monitor/src:/app/src
+      - ./shared:/shared
+    environment:
+      - REDIS_HOST=redis
+    networks:
+      - floresta-net
+
+networks:
+  floresta-net:
+    driver: bridge
