@@ -1,6 +1,7 @@
 from floresta_shared.messaging import MessageBroker
 import time
 import sys
+import os
 
 broker = None
 
@@ -13,7 +14,8 @@ def process_task(message):
     
     if task_type == "START_COLLECTION":
         # Simulate work
-        print("[DataCollector] Starting collection...")
+        limit = os.getenv("BATCH_LIMIT", "100")
+        print(f"[DataCollector] Starting collection (Limit: {limit})...")
         time.sleep(2)
         print("[DataCollector] Collection finished.")
         

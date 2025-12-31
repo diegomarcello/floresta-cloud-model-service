@@ -13,7 +13,8 @@ def process_task(message):
     
     if task_type == "PREDICT":
         # Simulate ML prediction
-        print("[MLInference] Loading model and predicting...")
+        model_ver = os.getenv("MODEL_VERSION", "v1")
+        print(f"[MLInference] Loading model {model_ver} and predicting...")
         time.sleep(1)
         print("[MLInference] Prediction done.")
         
