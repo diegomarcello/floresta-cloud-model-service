@@ -1,9 +1,25 @@
+version: '3.8'
+
 services:
   # Message Broker
   redis:
     image: redis:alpine
+    command: redis-server --requirepass ${REDIS_PASSWORD}
     ports:
       - "${REDIS_PORT}:6379"
+    networks:
+      - floresta-net
+
+  # Database
+  mongo:
+    image: mongo:latest
+    ports:
+      - "${MONGO_PORT}:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    volumes:
+      - mongo_data:/data/db
     networks:
       - floresta-net
 
@@ -14,12 +30,19 @@ services:
       dockerfile: services/master/Dockerfile
     depends_on:
       - redis
+      - mongo
     volumes:
       - ./services/master/src:/app/src
       - ./shared:/shared
     environment:
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_PORT=${MONGO_PORT}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_DB=${MONGO_DB}
       - POLL_INTERVAL=${MASTER_POLL_INTERVAL}
     networks:
       - floresta-net
@@ -31,12 +54,19 @@ services:
       dockerfile: services/ml_inference/Dockerfile
     depends_on:
       - redis
+      - mongo
     volumes:
       - ./services/ml_inference/src:/app/src
       - ./shared:/shared
     environment:
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_PORT=${MONGO_PORT}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_DB=${MONGO_DB}
       - MODEL_VERSION=${ML_MODEL_VERSION}
     networks:
       - floresta-net
@@ -47,12 +77,19 @@ services:
       dockerfile: services/rpa_worker/Dockerfile
     depends_on:
       - redis
+      - mongo
     volumes:
       - ./services/rpa_worker/src:/app/src
       - ./shared:/shared
     environment:
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_PORT=${MONGO_PORT}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_DB=${MONGO_DB}
       - TIMEOUT=${RPA_TIMEOUT}
     networks:
       - floresta-net
@@ -63,12 +100,19 @@ services:
       dockerfile: services/data_collector/Dockerfile
     depends_on:
       - redis
+      - mongo
     volumes:
       - ./services/data_collector/src:/app/src
       - ./shared:/shared
     environment:
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_PORT=${MONGO_PORT}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_DB=${MONGO_DB}
       - BATCH_LIMIT=${DATA_COLLECTOR_LIMIT}
     networks:
       - floresta-net
@@ -79,12 +123,19 @@ services:
       dockerfile: services/data_governance/Dockerfile
     depends_on:
       - redis
+      - mongo
     volumes:
       - ./services/data_governance/src:/app/src
       - ./shared:/shared
     environment:
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_PORT=${MONGO_PORT}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_DB=${MONGO_DB}
     networks:
       - floresta-net
 
@@ -101,12 +152,19 @@ services:
     #           capabilities: [gpu]
     depends_on:
       - redis
+      - mongo
     volumes:
       - ./services/llm_tuner/src:/app/src
       - ./shared:/shared
     environment:
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_PORT=${MONGO_PORT}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_DB=${MONGO_DB}
     networks:
       - floresta-net
 
@@ -116,14 +174,24 @@ services:
       dockerfile: services/monitor/Dockerfile
     depends_on:
       - redis
+      - mongo
     volumes:
       - ./services/monitor/src:/app/src
       - ./shared:/shared
     environment:
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_PORT=${MONGO_PORT}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_DB=${MONGO_DB}
     networks:
       - floresta-net
+
+volumes:
+  mongo_data:
 
 networks:
   floresta-net:

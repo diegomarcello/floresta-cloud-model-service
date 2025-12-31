@@ -9,7 +9,14 @@ class MessageBroker:
     def __init__(self, service_name: str):
         self.redis_host = os.getenv("REDIS_HOST", "localhost")
         self.redis_port = int(os.getenv("REDIS_PORT", 6379))
-        self.client = redis.Redis(host=self.redis_host, port=self.redis_port, db=0)
+        self.redis_password = os.getenv("REDIS_PASSWORD", None)
+        
+        self.client = redis.Redis(
+            host=self.redis_host, 
+            port=self.redis_port, 
+            password=self.redis_password,
+            db=0
+        )
         self.service_name = service_name
         self.pubsub = self.client.pubsub()
         self.running = True
